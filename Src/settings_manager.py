@@ -10,8 +10,7 @@ class settings_manager:
     __file_name: str = ""
     __company: company_model = None
     __settings: Settings = None
-
-
+    
     def __new__(cls):
         if not hasattr(cls, 'instance'):
             cls.instance = super(settings_manager, cls).__new__(cls)
@@ -23,6 +22,10 @@ class settings_manager:
     @property
     def company(self) -> company_model:
         return self.__company
+
+    @property
+    def settings(self) -> Settings:
+        return self.__settings
 
     @property
     def file_name(self) -> str:
@@ -38,12 +41,7 @@ class settings_manager:
             self.__file_name = abs_path
         else:
             raise Exception(f"Не найден файл настроек: {abs_path}")
-
-    
-    @property
-    def settings(self) -> Settings:
-        return self.__settings
-
+        
     def load(self) -> bool:
         if self.__file_name.strip() == "":
             raise Exception("Не найден файл настроек!")
@@ -61,12 +59,16 @@ class settings_manager:
             return False
 
     def convert(self, data: dict):
+        c = company_model()
+        c.name = data["name"]
+        c.inn = data["inn"]
+        c.account = data["account"]
+        c.corr_account = data["corr_account"]
+        c.bik = data["bik"]
+        self.__company = c
+
         s = Settings()
-        s.name = data["name"]
-        s.inn = data["inn"]
-        s.account = data["account"]
-        s.corr_account = data["corr_account"]
-        s.bik = data["bik"]
+
         s.ownership = data["ownership"]
         self.__settings = s
 
