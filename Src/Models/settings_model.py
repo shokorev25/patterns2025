@@ -3,7 +3,7 @@ from Src.Models.company_model import company_model
 
 ######################################
 # Модель настроек приложения
-class settings_model:
+class settings_model: 
     __company: company_model = None
 
     # Текущая организация

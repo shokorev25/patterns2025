@@ -36,7 +36,7 @@ class test_models(unittest.TestCase):
         self.assertEqual(model.account, 12345678901)
         self.assertEqual(model.ownership, "ООО")
 
-
+ 
     def test_create_from_settings_companymodel(self):
         manager = settings_manager()
         try:

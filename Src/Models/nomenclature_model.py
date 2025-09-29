@@ -21,7 +21,7 @@ class nomenclature_model(abstract_reference):
     def full_name(self) -> str:
         return self.__full_name
     
-    @full_name.setter
+    @full_name.setter 
     def full_name(self, value: str):
         validator.validate(value, str, 255)
         self.__full_name = value.strip()

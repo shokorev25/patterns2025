@@ -1,7 +1,7 @@
 from Src.Core.validator import validator, argument_exception
 from Src.Core.abstract_reference import abstract_reference
 from Src.Models.settings_model import settings_model
-
+ 
 ###############################################
 # Модель организации
 class company_model(abstract_reference):

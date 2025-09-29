@@ -1,6 +1,6 @@
 from Src.Core.validator import validator
 from Src.Core.abstract_reference import abstract_reference
-
+ 
 ###############################################
 # Модель группы номенклатуры
 class nomenclature_group_model(abstract_reference):

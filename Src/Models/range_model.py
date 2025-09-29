@@ -25,7 +25,7 @@ class range_model(abstract_reference):
         self.__base_unit = value
 
 
-    @property
+    @property 
     def conversion_factor(self) -> float:
         return self.__conversion_factor
     
