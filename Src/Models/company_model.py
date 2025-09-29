@@ -1,83 +1,75 @@
+from Src.Core.validator import validator, argument_exception
+from Src.Core.abstract_reference import abstract_reference
+from Src.Models.settings_model import settings_model
+
 ###############################################
 # Модель организации
-class company_model:
-    __name: str = ""
+class company_model(abstract_reference):
     __inn: int = 0
-    __account: int = 0
+    __bic: int = 0
     __corr_account: int = 0
-    __bik: int = 0
+    __account: int = 0
+    __ownership: str = ""
 
-    # Наименование
-    @property
-    def name(self) -> str:
-        return self.__name
-
-    @name.setter
-    def name(self, value: str):
-        if not value.strip():
-            raise ValueError("Наименование не может быть пустым!")
-        self.__name = value.strip()
+    def __init__(self, settings: settings_model = None) -> None:
+        super().__init__()
+        if settings is not None:
+            if not isinstance(settings, settings_model):
+                raise argument_exception("Неверный тип параметра settings!")
+            if settings.company is not None:
+                self.name = settings.company.name
+                self.__inn = settings.company.inn
+                self.__bic = settings.company.bic
+                self.__corr_account = settings.company.corr_account
+                self.__account = settings.company.account
+                self.__ownership = settings.company.ownership
 
     # ИНН
     @property
     def inn(self) -> int:
         return self.__inn
-
+    
     @inn.setter
     def inn(self, value: int):
-        value_str = str(value)
-        if len(value_str) != 12 or not value_str.isdigit():
-            raise ValueError("ИНН должен содержать 12 цифр!")
-        self.__inn = int(value)
-
-    # Счёт
-    @property
-    def account(self) -> int:
-        return self.__account
-
-    @account.setter
-    def account(self, value: int):
-        value_str = str(value)
-        if len(value_str) != 11 or not value_str.isdigit():
-            raise ValueError("Счёт должен содержать 11 цифр!")
-        self.__account = int(value)
-
-    # Корреспондентский счёт
-    @property
-    def corr_account(self) -> int:
-        return self.__corr_account
-
-    @corr_account.setter
-    def corr_account(self, value: int):
-        value_str = str(value)
-        if len(value_str) != 11 or not value_str.isdigit():
-            raise ValueError("Корреспондентский счёт должен содержать 11 цифр!")
-        self.__corr_account = int(value)
+        validator.validate(value, int, 12)
+        self.__inn = value
 
     # БИК
     @property
-    def bik(self) -> int:
-        return self.__bik
+    def bic(self) -> int:
+        return self.__bic
 
-    @bik.setter
-    def bik(self, value: int):
-        value_str = str(value)
-        if len(value_str) != 9 or not value_str.isdigit():
-            raise ValueError("БИК должен содержать 9 цифр!")
-        self.__bik = int(value)
+    @bic.setter
+    def bic(self, value: int):
+        validator.validate(value, int, 9)
+        self.__bic = value
 
+    # Корреспондентский счет
+    @property
+    def corr_account(self) -> int:
+        return self.__corr_account
+        
+    @corr_account.setter
+    def corr_account(self, value: int):
+        validator.validate(value, int, 11)
+        self.__corr_account = value
 
-#################################################
-# Настройки организации
-class Settings:
-    __ownership: str = ""
+    # Счет
+    @property
+    def account(self) -> int:
+        return self.__account
+    
+    @account.setter
+    def account(self, value: int):
+        validator.validate(value, int, 11)
+        self.__account = value
 
+    # Форма собственности
     @property
     def ownership(self) -> str:
         return self.__ownership
-
+    
     @ownership.setter
     def ownership(self, value: str):
-        if len(value) != 5:
-            raise ValueError("Вид собственности должен содержать 5 символов!")
-        self.__ownership = value
+        validator.validate(value, str, 5)
+        self.__ownership = value.strip()
