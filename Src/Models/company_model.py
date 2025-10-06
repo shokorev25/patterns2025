@@ -1,83 +1,73 @@
+from Src.Core.validator import validator
+from Src.Core.entity_model import entity_model
+
 ###############################################
 # Модель организации
-class company_model:
-    __name: str = ""
-    __inn: int = 0
-    __account: int = 0
-    __corr_account: int = 0
-    __bik: int = 0
+class company_model(entity_model):
+    __name:str = ""
+    __inn:int = 0
+    __bic:int = 0
+    __corr_account:int = 0
+    __account:int = 0
+    __ownership:str = ""
 
+    # ИНН : 12 симв
+    # Счет 11 симв
+    # Корреспондентский счет 11 симв
+    # БИК 9 симв
     # Наименование
-    @property
-    def name(self) -> str:
-        return self.__name
-
-    @name.setter
-    def name(self, value: str):
-        if not value.strip():
-            raise ValueError("Наименование не может быть пустым!")
-        self.__name = value.strip()
+    # Вид собственности 5 симв
 
     # ИНН
     @property
     def inn(self) -> int:
         return self.__inn
-
+    
     @inn.setter
-    def inn(self, value: int):
-        value_str = str(value)
-        if len(value_str) != 12 or not value_str.isdigit():
-            raise ValueError("ИНН должен содержать 12 цифр!")
-        self.__inn = int(value)
+    def inn(self, value:int):
+        validator.validate(value, int, 12)
+        self.__inn = value
 
-    # Счёт
+    # КПП
     @property
-    def account(self) -> int:
-        return self.__account
+    def bic(self) -> int:
+        return self.__bic
 
-    @account.setter
-    def account(self, value: int):
-        value_str = str(value)
-        if len(value_str) != 11 or not value_str.isdigit():
-            raise ValueError("Счёт должен содержать 11 цифр!")
-        self.__account = int(value)
+    @bic.setter
+    def bic(self, value:int):
+        validator.validate(value, int, 9)
+        self.__bic = value
 
-    # Корреспондентский счёт
+    # Корреспондентский счет
     @property
     def corr_account(self) -> int:
         return self.__corr_account
-
+        
     @corr_account.setter
-    def corr_account(self, value: int):
-        value_str = str(value)
-        if len(value_str) != 11 or not value_str.isdigit():
-            raise ValueError("Корреспондентский счёт должен содержать 11 цифр!")
-        self.__corr_account = int(value)
+    def corr_account(self, value:int):
+        validator.validate(value, int, 11)
+        self.__corr_account = value
 
-    # БИК
     @property
-    def bik(self) -> int:
-        return self.__bik
-
-    @bik.setter
-    def bik(self, value: int):
-        value_str = str(value)
-        if len(value_str) != 9 or not value_str.isdigit():
-            raise ValueError("БИК должен содержать 9 цифр!")
-        self.__bik = int(value)
-
-
-#################################################
-# Настройки организации
-class Settings:
-    __ownership: str = ""
+    def account(self) -> int:
+        return self.__account
+    
+    @account.setter
+    def account(self, value:int):
+        validator.validate(value, int, 11)
+        self.__account = value
 
     @property
     def ownership(self) -> str:
         return self.__ownership
-
+    
     @ownership.setter
-    def ownership(self, value: str):
-        if len(value) != 5:
-            raise ValueError("Вид собственности должен содержать 5 символов!")
-        self.__ownership = value
+    def ownership(self, value:str):
+        validator.validate(value, str, 5)
+        self.__ownership = value.strip()
+
+ 
+
+       
+
+
