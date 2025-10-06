@@ -1,24 +1,50 @@
+
+"""
+Исключение при проверки аргумента
+"""   
 class argument_exception(Exception):
-    def __init__(self, message: str):
-        super().__init__(message)
- 
+    pass     
+    
+"""
+Исключение при выполнении бизнес операции
+"""  
 class operation_exception(Exception):
-    def __init__(self, message: str):
-        super().__init__(message)
-class error_proxy:
-    def __init__(self, exception: Exception):
-        self.exception = exception
+    pass    
+    
 
-    def __str__(self):
-        return str(self.exception)
-
+"""
+Набор проверок данных
+"""
 class validator:
+
     @staticmethod
-    def validate(value, expected_type, max_length: int = None):
-        if not isinstance(value, expected_type):
-            raise argument_exception(f"Ожидался тип {expected_type.__name__}, получен {type(value).__name__}")
-        if max_length is not None:
-            if expected_type == str and len(value) > max_length:
-                raise argument_exception(f"Длина строки превышает {max_length} символов")
-            if expected_type == int and len(str(value)) != max_length:
-                raise argument_exception(f"Число должно содержать ровно {max_length} цифр")
+    def validate( value, type_, len_= None):
+        """
+            Валидация аргумента по типу и длине
+        Args:
+            value (any): Аргумент
+            type_ (object): Ожидаемый тип
+            len_ (int): Максимальная длина
+        Raises:
+            arguent_exception: Некорректный тип
+            arguent_exception: Неулевая длина
+            arguent_exception: Некорректная длина аргумента
+        Returns:
+            True или Exception
+        """
+
+        if value is None:
+            raise argument_exception("Пустой аргумент")
+
+        # Проверка типа
+        if not isinstance(value, type_):
+            raise argument_exception(f"Некорректный тип!\nОжидается {type_}. Текущий тип {type(value)}")
+
+        # Проверка аргумента
+        if len(str(value).strip()) == 0:
+            raise argument_exception("Пустой аргумент")
+
+        if len_ is not None and len(str(value).strip()) > len_:
+            raise argument_exception("Некорректная длина аргумента")
+
+        return True
