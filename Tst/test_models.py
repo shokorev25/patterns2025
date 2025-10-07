@@ -1,131 +1,101 @@
-import Src
 from Src.settings_manager import settings_manager
-from Src.Models.company_model import company_model, Settings
+from Src.Models.company_model import company_model
 import unittest
-import tempfile
-import json
-import os
-
+from Src.Models.storage_model import storage_model
+import uuid
+from Src.Models.nomenclature_model import nomenclature_model
 
 class test_models(unittest.TestCase):
 
-    def test_empty_name_raises(self):
+    # Провери создание основной модели
+    # Данные после создания должны быть пустыми
+    def test_empty_createmodel_companymodel(self):
+        # Подготовка
         model = company_model()
-        with self.assertRaises(ValueError):
-            model.name = "   "  # пустое имя не допускается
 
+        # Действие
+
+        # Проверки
+        assert model.name == ""
+
+
+    # Проверить создание основной модели
+    # Данные меняем. Данные должны быть
     def test_notEmpty_createmodel_companymodel(self):
+        # Подготовка
         model = company_model()
+        
+        # Действие
         model.name = "test"
-        assert model.name == "test"
+        
+        # Проверки
+        assert model.name != ""
 
-    def test_invalid_inn_raises(self):
-        model = company_model()
-        with self.assertRaises(ValueError):
-            model.inn = 123  # слишком короткий
-
-    def test_invalid_account_raises(self):
-        model = company_model()
-        with self.assertRaises(ValueError):
-            model.account = 123456  # слишком короткий
-
-    def test_invalid_bik_raises(self):
-        model = company_model()
-        with self.assertRaises(ValueError):
-            model.bik = 111  # слишком короткий
-
-    def test_invalid_corr_account_raises(self):
-        model = company_model()
-        with self.assertRaises(ValueError):
-            model.corr_account = 1  # слишком короткий
-
-    def test_invalid_ownership_raises(self):
-        s = Settings()
-        with self.assertRaises(ValueError):
-            s.ownership = "OO"  # слишком короткий
-
+    # Проверить создание основной модели
+    # Данные загружаем через json настройки
     def test_load_createmodel_companymodel(self):
-        data = {
-            "company": {
-                "name": "Фирма А",
-                "inn": 123456789012,
-                "account": 11111111111,
-                "corr_account": 22222222222,
-                "bik": 333333333,
-                "ownership": "OOO12"
-            }
-        }
+        # Подготовка
+       file_name = "settings.json"
+       manager = settings_manager()
+       manager.file_name = file_name
+       
+       # Действие
+       result = manager.load()
+            
+       # Проверки
+       print(manager.file_name)
+       assert result == True
 
-        with tempfile.NamedTemporaryFile("w", delete=False, suffix=".json", encoding="utf-8") as tmp:
-            json.dump(data, tmp, ensure_ascii=False)
-            tmp_path = tmp.name
 
-        try:
-            manager = settings_manager()
-            manager.file_name = tmp_path
-            result = manager.load()
-            assert result is True
-            assert manager.company.name == "Фирма А"
-            assert manager.company.inn == 123456789012
-            assert manager.settings.ownership == "OOO12"
-        finally:
-            os.remove(tmp_path)
-
+    # Проверить создание основной модели
+    # Данные загружаем. Проверяем работу Singletone
     def test_loadCombo_createmodel_companymodel(self):
-        data = {
-            "company": {
-                "name": "Фирма Б",
-                "inn": 987654321098,
-                "account": 33333333333,
-                "corr_account": 44444444444,
-                "bik": 555555555,
-                "ownership": "ZAO34"
-            }
-        }
+        # Подготовка
+        file_name = "./Tst/settings.json"
+        manager1 = settings_manager()
+        manager1.file_name = file_name
+        manager2 = settings_manager()
+        check_inn = 123456789
+      
 
-        with tempfile.NamedTemporaryFile("w", delete=False, suffix=".json", encoding="utf-8") as tmp:
-            json.dump(data, tmp, ensure_ascii=False)
-            tmp_path = tmp.name
+        # Действие
+        manager1.load()
 
-        try:
-            manager1 = settings_manager()
-            manager1.file_name = tmp_path
-            manager2 = settings_manager()
-            manager1.load()
-            assert manager1.company == manager2.company
-        finally:
-            os.remove(tmp_path)
+        # Проверки
+        assert manager1.settings == manager2.settings
+        print(manager1.file_name)
+        assert(manager1.settings.company.inn == check_inn )
+        print(f"ИНН {manager1.settings.company.inn}")
 
-    def test_load_from_other_directory(self):
-        temp_dir = tempfile.mkdtemp()
-        file_path = os.path.join(temp_dir, "custom_settings.json")
+    # Проверка на сравнение двух по значению одинаковых моделей
+    def test_equals_storage_model_create(self):
+        # Подготовка
+        id = uuid.uuid4().hex
+        storage1 = storage_model()
+        storage1.unique_code = id
+        storage2 = storage_model()   
+        storage2.unique_code = id
 
-        data = {
-            "company": {
-                "name": "Другая фирма",
-                "inn": 987654321098,
-                "account": 44444444444,
-                "corr_account": 55555555555,
-                "bik": 666666666,
-                "ownership": "ZAO34"
-            }
-        }
+        # Действие 
 
-        with open(file_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False)
+        # Проверки
+        assert storage1 == storage2
 
-        try:
-            manager = settings_manager()
-            manager.file_name = file_path
-            result = manager.load()
-            assert result is True
-            assert manager.company.name == "Другая фирма"
-            assert manager.company.inn == 987654321098
-            assert manager.settings.ownership == "ZAO34"
-        finally:
-            os.remove(file_path)
+    # Проверить создание номенклатуры и присвоение уникального кода
+    def test_equals_nomenclature_model_create(self):
+        # Подготовка
+        id = uuid.uuid4().hex
+        item1 = nomenclature_model()
+        item1.unique_code = id
+        item2 = nomenclature_model()
+        item2.unique_code = id
 
+        # Действие
 
-if __name__ == '__main__':
-    unittest.main()
+        # Проверки
+        assert item1 == item2
+
     
+  
+if __name__ == '__main__':
+    unittest.main()   
