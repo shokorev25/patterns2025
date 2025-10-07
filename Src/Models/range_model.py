@@ -9,12 +9,12 @@ class range_model(entity_model):
     __base:'range_model' = None
 
     """
-    Значение коэффициента пересчета
+    Значение коэффициента пересчета (целое)
     """
     @property
     def value(self) -> int:
         return self.__value
-    
+
     @value.setter
     def value(self, value: int):
         validator.validate(value, int)
@@ -22,41 +22,44 @@ class range_model(entity_model):
              raise argument_exception("Некорректный аргумент!")
         self.__value = value
 
-
     """
     Базовая единица измерения
     """
     @property
     def base(self):
         return self.__base
-    
+
     @base.setter
     def base(self, value):
+        # база может быть None либо range_model
+        if value is not None:
+            validator.validate(value, range_model)
         self.__base = value
 
     """
-    Киллограмм
+    Фабрики для распространённых единиц
     """
     @staticmethod
     def create_kill():
-        inner_gramm = range_model.create_gramm()
-        return range_model.create(  "киллограмм", inner_gramm)
+        """
+        Киллограмм (килограмм): база грамм, коэффициент 1000
+        """
+        gramm = range_model.create_gramm()
+        item = range_model.create("киллограмм", gramm)
+        item.value = 1000
+        return item
 
-    """
-    Грамм
-    """
     @staticmethod
     def create_gramm():
-        return range_model.create("грамм")
-     
-    """
-    Универсальный метод - фабричный
-    """
+        item = range_model.create("грамм")
+        item.value = 1
+        return item
+
     @staticmethod
-    def create(name:str, base _):
+    def create(name:str, base=None):
         validator.validate(name, str)
         inner_base = None
-        if not base is None: 
+        if base is not None:
             validator.validate(base, range_model)
             inner_base = base
         item = range_model()
