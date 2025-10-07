@@ -1,78 +1,91 @@
-import Src
-from Src.Models.company_model import company_model, Settings
+from Src.Models.settings_model import settings_model
+from Src.Core.validator import argument_exception
+from Src.Core.validator import operation_exception
+from Src.Core.validator import validator
+from Src.Models.company_model import company_model
 import os
 import json
 
-####################################################
-# Менеджер настроек.
+####################################################3
+# Менеджер настроек. 
 # Предназначен для управления настройками и хранения параметров приложения
 class settings_manager:
-    __file_name: str = ""
-    __company: company_model = None
-    __settings: Settings = None
-    
+    # Наименование файла (полный путь)
+    __full_file_name:str = ""
+
+    # Настройки
+    __settings:settings_model = None
+
+    # Singletone
     def __new__(cls):
         if not hasattr(cls, 'instance'):
             cls.instance = super(settings_manager, cls).__new__(cls)
-        return cls.instance
-
+        return cls.instance 
+    
     def __init__(self):
         self.set_default()
 
+    # Текущие настройки
     @property
-    def company(self) -> company_model:
-        return self.__company
-
-    @property
-    def settings(self) -> Settings:
+    def settings(self) -> settings_model:
         return self.__settings
 
+    # Текущий каталог
     @property
     def file_name(self) -> str:
-        return self.__file_name
+        return self.__full_file_name
 
+    # Полный путь к файлу настроек
     @file_name.setter
-    def file_name(self, value: str):
-        if value.strip() == "":
-            return
-
-        abs_path = os.path.abspath(value)
-        if os.path.exists(abs_path):
-            self.__file_name = abs_path
+    def file_name(self, value:str):
+        validator.validate(value, str)
+        full_file_name = os.path.abspath(value)        
+        if os.path.exists(full_file_name):
+            self.__full_file_name = full_file_name.strip()
         else:
-            raise Exception(f"Не найден файл настроек: {abs_path}")
-        
+            raise argument_exception(f'Не найден файл настроек {full_file_name}')
+
+    # Загрузить настройки из Json файла
     def load(self) -> bool:
-        if self.__file_name.strip() == "":
-            raise Exception("Не найден файл настроек!")
+        if self.__full_file_name == "":
+            raise operation_exception("Не найден файл настроек!")
 
         try:
-            with open(self.__file_name.strip(), 'r', encoding="utf-8") as file_instance:
-                data = json.load(file_instance)
+            with open( self.__full_file_name, 'r') as file_instance:
+                settings = json.load(file_instance)
 
-                if "company" in data.keys():
-                    self.convert(data["company"])
-                    return True
+                if "company" in settings.keys():
+                    data = settings["company"]
+                    return self.convert(data)
+
             return False
-        except Exception as ex:
-            print(f"Ошибка загрузки: {ex}")
+        except:
             return False
+        
+    # Обработать полученный словарь    
+    def convert(self, data: dict) -> bool:
+        validator.validate(data, dict)
 
-    def convert(self, data: dict):
-        c = company_model()
-        c.name = data["name"]
-        c.inn = data["inn"]
-        c.account = data["account"]
-        c.corr_account = data["corr_account"]
-        c.bik = data["bik"]
-        self.__company = c
+        fields = list(filter(lambda x: not x.startswith("_") , dir(self.__settings.company))) 
+        matching_keys = list(filter(lambda key: key in fields, data.keys()))
 
-        s = Settings()
+        try:
+            for key in matching_keys:
+                setattr(self.__settings.company, key, data[key])
+        except:
+            return False        
 
-        s.ownership = data["ownership"]
-        self.__settings = s
+        return True
 
+
+    # Параметры настроек по умолчанию
     def set_default(self):
-        self.__company = company_model()
-        self.__company.name = "Рога и копыта"
-        self.__settings = None
+        company = company_model()
+        company.name = "Рога и копыта"
+        company.inn = -1
+        
+        self.__settings = settings_model()
+        self.__settings.company = company
+
+
+
